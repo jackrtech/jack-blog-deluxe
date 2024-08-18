@@ -1,0 +1,37 @@
+.blog-list {
+    padding: 1rem;
+}
+
+.blog-post {
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+}
+
+.blog-post h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.blog-post p {
+    margin: 0.5rem 0;
+}
+
+.loading, .no-more {
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.2rem;
+}
+
+.loading {
+    font-weight: bold;
+}
+
+.no-more {
+    color: #888;
+}
+
+.end-of-content {
+    text-align: center;
+    font-size: 2rem;
+    margin: 5px;
+}  
