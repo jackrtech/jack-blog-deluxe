@@ -4,15 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "./Header.css"
 
 export default function Header() {
-    const navigate=useNavigate()
-
-    const handleClick = (event) => {
-        event.preventDefault()
-        const targetHref = event.target.getAttribute('href')
-        navigate(targetHref)
-    }
-
-
 
 
     return (
@@ -21,10 +12,10 @@ export default function Header() {
                 <nav className="navbar navbar-expand-lg navbar-dark">
                     <div id="navbarNav">
                     <ul className="navbar-nav ml-auto">
-                        <li className="nav-item" onClick={handleClick}>
+                        <li className="nav-item">
                             <Link to="/" className="nav-link">Home</Link>
                         </li>
-                        <li className="nav-item" onClick={handleClick}>
+                        <li className="nav-item">
                             <Link to="/about" className="nav-link">About</Link>
                         </li>
                     </ul>
