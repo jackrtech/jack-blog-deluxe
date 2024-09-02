@@ -1,70 +1,49 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './BlogList.css'; // Custom styles
+import axios from 'axios';
+import './BlogList.css'; 
 
 const BlogList = () => {
-
-    const [blogs, setBlogs] = useState([]); // state to store the fetched blogs in an array
+    const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [hasMore, setHasMore] = useState(true); // state to check if more blogs are available
-    const [currentPage, setCurrentPage] = useState(1); 
+    const [hasMore, setHasMore] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [error, setError] = useState(null);
 
-
-    const exampleBlogs = [
-        { id: 1, title: 'Blog Post 1', content: 'This is the content of the first blog post.' },
-        { id: 2, title: 'Blog Post 2', content: 'This is the content of the second blog post.' },
-        { id: 3, title: 'Blog Post 3', content: 'This is the content of the third blog post.' },
-        { id: 4, title: 'Blog Post 4', content: 'This is the content of the fourth blog post.' },
-        { id: 5, title: 'Blog Post 5', content: 'This is the content of the fifth blog post.' },
-        { id: 6, title: 'Blog Post 6', content: 'This is the content of the sixth blog post.' },
-        { id: 7, title: 'Blog Post 7', content: 'This is the content of the seventh blog post.' },
-        { id: 8, title: 'Blog Post 8', content: 'This is the content of the eighth blog post.' },
-        { id: 9, title: 'Blog Post 9', content: 'This is the content of the ninth blog post.' },
-        { id: 10, title: 'Blog Post 10', content: 'This is the content of the tenth blog post.' },
-        { id: 11, title: 'Blog Post 11', content: 'This is the content of the eleventh blog post.' },
-        { id: 12, title: 'Blog Post 12', content: 'This is the content of the twelfth blog post.' },
-        { id: 13, title: 'Blog Post 13', content: 'This is the content of the thirteenth blog post.' },
-        { id: 14, title: 'Blog Post 14', content: 'This is the content of the fourteenth blog post.' },
-        { id: 15, title: 'Blog Post 15', content: 'This is the content of the fifteenth blog post.' },
-        { id: 16, title: 'Blog Post 16', content: 'This is the content of the sixteenth blog post.' },
-    ];
-
-    // Function to fetch more blogs
-    const fetchBlogs = useCallback(() => {
+    const fetchBlogs = useCallback(async () => {
         if (loading || !hasMore) return;
         setLoading(true);
 
-        // Simulating the API call with hardcoded example blogs
-        setTimeout(() => {
-
-            const blogsPerPage = 4; 
-            const startIndex = (currentPage - 1) * blogsPerPage;
-            const endIndex = startIndex + blogsPerPage;
-
-            const newBlogs = exampleBlogs.slice(startIndex, endIndex);
-
-            if (newBlogs.length > 0) {
-                setBlogs(prevBlogs => [...prevBlogs, ...newBlogs]);
+        try {
+            const response = await axios.get(`http://localhost:5000/?page=${currentPage}&limit=4`);
+            const data = response.data;
+            
+            if (data.data.length > 0) {
+                setBlogs(prevBlogs => [...prevBlogs, ...data.data]);
                 setCurrentPage(prevPage => prevPage + 1);
             } else {
                 setHasMore(false);
             }
-
+        } catch (error) {
+            console.error('Error fetching blogs:', error);
+            setError('Failed to load blogs. Please try again later.');
+            setHasMore(false);
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
     }, [loading, hasMore, currentPage]);
 
-
-    const handleScroll = () => {
-        if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight || loading) return;
-        fetchBlogs();
-    };
+    const handleScroll = useCallback(() => {
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50 && !loading) {
+            fetchBlogs();
+        }
+    }, [fetchBlogs, loading]);
 
     useEffect(() => {
         window.addEventListener('scroll', handleScroll);
-        fetchBlogs(); //initial fetch of the blogs + event listener for the scroll
+        fetchBlogs(); //first fetch here
 
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [fetchBlogs]);
+    }, [handleScroll, fetchBlogs]);
 
     return (
         <div className="blog-list">
@@ -75,6 +54,7 @@ const BlogList = () => {
                 </div>
             ))}
             {loading && <div className="loading">Loading...</div>}
+            {error && <div className="error">{error}</div>}
             {!hasMore && !loading && <div className="end-of-content">---- END OF CONTENT ----</div>}
         </div>
     );
