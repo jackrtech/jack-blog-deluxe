@@ -17,6 +17,9 @@ const BlogList = () => {
             const response = await axios.get(`http://localhost:5000/?page=${currentPage}&limit=4`);
             const data = response.data;
             
+            console.log(data.data)
+            console.log('hello')
+
             if (data.data.length > 0) {
                 setBlogs(prevBlogs => [...prevBlogs, ...data.data]);
                 setCurrentPage(prevPage => prevPage + 1);
