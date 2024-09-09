@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import './BlogList.css'; 
+import './BlogList.css';
 
 const BlogList = () => {
     const [blogs, setBlogs] = useState([]);
@@ -16,7 +16,7 @@ const BlogList = () => {
         try {
             const response = await axios.get(`http://localhost:5000/?page=${currentPage}&limit=4`);
             const data = response.data;
-            
+
             if (data.data.length > 0) {
                 setBlogs(prevBlogs => [...prevBlogs, ...data.data]);
                 setCurrentPage(prevPage => prevPage + 1);
