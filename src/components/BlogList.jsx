@@ -12,16 +12,21 @@ const BlogList = () => {
     const fetchBlogs = useCallback(async () => {
         if (loading || !hasMore) return;
         setLoading(true);
-
+    
         try {
-            const response = await axios.get(`http://localhost:5000/?page=${currentPage}&limit=4`);
+            const response = await axios.get(`http://localhost:5000/?page=${currentPage}&limit=10`);
             const data = response.data;
-            
-            console.log(data.data)
-            console.log('hello')
-
+    
             if (data.data.length > 0) {
-                setBlogs(prevBlogs => [...prevBlogs, ...data.data]);
+                setBlogs(prevBlogs => {
+                    const allBlogs = [...prevBlogs, ...data.data];
+                    //sort by descending order
+                    const sortedBlogs = allBlogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    //remove duplicate IDs
+                    const uniqueBlogs = Array.from(new Set(sortedBlogs.map(blog => blog.id)))
+                                            .map(id => sortedBlogs.find(blog => blog.id === id));
+                    return uniqueBlogs;
+                });
                 setCurrentPage(prevPage => prevPage + 1);
             } else {
                 setHasMore(false);
@@ -34,6 +39,7 @@ const BlogList = () => {
             setLoading(false);
         }
     }, [loading, hasMore, currentPage]);
+    
 
     const handleScroll = useCallback(() => {
         if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50 && !loading) {
