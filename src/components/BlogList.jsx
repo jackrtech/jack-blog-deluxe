@@ -11,39 +11,50 @@ const BlogList = () => {
 
     const fetchBlogs = useCallback(async () => {
         if (loading || !hasMore) return;
-        setLoading(true);
 
+        setLoading(true);
         try {
-            const response = await axios.get(`http://localhost:5000/?page=${currentPage}&limit=4`);
+            const response = await axios.get(`http://localhost:5000/?page=${currentPage}&limit=10`);
             const data = response.data;
 
             if (data.data.length > 0) {
-                setBlogs(prevBlogs => [...prevBlogs, ...data.data]);
+                setBlogs(prevBlogs => {
+                    const allBlogs = [...prevBlogs, ...data.data];
+                    // sort by timestamp in descending order
+                    const sortedBlogs = allBlogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    // remove duplicate posts by ID
+                    const uniqueBlogs = Array.from(new Set(sortedBlogs.map(blog => blog.id)))
+                        .map(id => sortedBlogs.find(blog => blog.id === id));
+                    return uniqueBlogs;
+                });
                 setCurrentPage(prevPage => prevPage + 1);
             } else {
-                setHasMore(false);
+                setHasMore(false); //set false once no more post available to load
             }
         } catch (error) {
             console.error('Error fetching blogs:', error);
             setError('Failed to load blogs. Please try again later.');
-            setHasMore(false);
         } finally {
             setLoading(false);
         }
     }, [loading, hasMore, currentPage]);
 
-    const handleScroll = useCallback(() => {
-        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50 && !loading) {
+    const handleScroll = useCallback(() => { //scroll feature
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100 && !loading) {
             fetchBlogs();
         }
     }, [fetchBlogs, loading]);
 
     useEffect(() => {
-        window.addEventListener('scroll', handleScroll);
-        fetchBlogs(); //first fetch here
+        fetchBlogs(); //initial fetch
+    }, [fetchBlogs]);
 
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [handleScroll, fetchBlogs]);
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [handleScroll]);
 
     return (
         <div className="blog-list">
@@ -61,3 +72,4 @@ const BlogList = () => {
 };
 
 export default BlogList;
+
