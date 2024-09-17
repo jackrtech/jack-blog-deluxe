@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import './BlogList.css';
 
 const BlogList = () => {
@@ -17,19 +18,19 @@ const BlogList = () => {
             const response = await axios.get(`http://localhost:5000/?page=${currentPage}&limit=10`);
             const data = response.data;
 
+            console.log(data.data)
+
             if (data.data.length > 0) {
                 setBlogs(prevBlogs => {
                     const allBlogs = [...prevBlogs, ...data.data];
-                    // sort by timestamp in descending order
-                    const sortedBlogs = allBlogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    // remove duplicate posts by ID
-                    const uniqueBlogs = Array.from(new Set(sortedBlogs.map(blog => blog.id)))
+                    const sortedBlogs = allBlogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));   // Sort by timestamp in descending order
+                    const uniqueBlogs = Array.from(new Set(sortedBlogs.map(blog => blog.id)))                     // Remove duplicate posts by ID
                         .map(id => sortedBlogs.find(blog => blog.id === id));
                     return uniqueBlogs;
                 });
                 setCurrentPage(prevPage => prevPage + 1);
             } else {
-                setHasMore(false); //set false once no more post available to load
+                setHasMore(false); // No more posts available to load
             }
         } catch (error) {
             console.error('Error fetching blogs:', error);
@@ -39,14 +40,14 @@ const BlogList = () => {
         }
     }, [loading, hasMore, currentPage]);
 
-    const handleScroll = useCallback(() => { //scroll feature
+    const handleScroll = useCallback(() => {
         if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100 && !loading) {
             fetchBlogs();
         }
     }, [fetchBlogs, loading]);
 
     useEffect(() => {
-        fetchBlogs(); //initial fetch
+        fetchBlogs(); // Initial fetch
     }, [fetchBlogs]);
 
     useEffect(() => {
@@ -60,8 +61,10 @@ const BlogList = () => {
         <div className="blog-list">
             {blogs.map(blog => (
                 <div key={blog.id} className="blog-post">
-                    <h2>{blog.title}</h2>
-                    <p>{blog.content}</p>
+                    <h2>
+                        <Link to={`/${blog.id}`}>{blog.title}</Link>
+                    </h2>
+                    <p>{blog.content.substring(0, 100)}...</p> 
                 </div>
             ))}
             {loading && <div className="loading">Loading...</div>}
@@ -72,4 +75,3 @@ const BlogList = () => {
 };
 
 export default BlogList;
-
