@@ -16,7 +16,7 @@ export default function MyApp() {
       <Header />
         <Routes>
           <Route exact path="/" element={<HomePage />} />
-          <Route path="/:id" Component={<SinglePost />} />
+          <Route path="/:id" element={<SinglePost />} />
           <Route path="/about" element={<About />} />
         </Routes>
       </Router>
